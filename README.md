@@ -1,175 +1,96 @@
-# SkillBridge — Attendance Management System
+<div align="center">
 
-[![Frontend](https://img.shields.io/badge/Frontend-Vercel-black?logo=vercel)](https://skillbridge.vercel.app)
-[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?logo=render)](https://skillbridge-api.onrender.com)
+<img src="https://img.shields.io/badge/SkillBridge-Attendance%20Management-6366f1?style=for-the-badge&logo=graduation-cap&logoColor=white" />
+
+<br/><br/>
+
+[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat-square&logo=render&logoColor=white)](https://skillbridge-backend.onrender.com)
+[![Frontend](https://img.shields.io/badge/Frontend-Render-46E3B7?style=flat-square&logo=render&logoColor=white)](https://skillbridge-frontend.onrender.com)
+[![Database](https://img.shields.io/badge/Database-Railway%20MySQL-0B0D0E?style=flat-square&logo=railway&logoColor=white)](https://railway.app)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org)
+[![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org)
+
+<br/>
+
+> **A production-ready, full-stack attendance management system** with 5 role-based dashboards, real-time session tracking, and a clean Spring Boot + Next.js architecture.
+
+</div>
+
+---
 
 ## 🌐 Live URLs
 
 | Service | URL |
 |---|---|
-| Frontend | `https://skillbridge.vercel.app` *(update after deploy)* |
-| Backend | `https://skillbridge-api.onrender.com` *(update after deploy)* |
-| API Health | `https://skillbridge-api.onrender.com/actuator/health` |
+| 🖥️ **Frontend** | [skillbridge-frontend.onrender.com](https://skillbridge-frontend.onrender.com) |
+| ⚙️ **Backend API** | [skillbridge-backend.onrender.com](https://skillbridge-backend.onrender.com) |
+| 🏥 **Health Check** | [/api/health](https://skillbridge-backend.onrender.com/api/health) |
+| 📂 **GitHub** | [SkillBridge-Attendance-Management-System](https://github.com/zubair-ahmad-beigh/SkillBridge-Attendance-Management-System) |
 
 ---
 
-## 👥 Test Accounts
+## ✨ Features
 
-After deploying, create accounts through the sign-up flow and select a role on the onboarding screen.
+- 🎓 **5 Role-Based Dashboards** — Student, Trainer, Institution, Programme Manager, Monitoring Officer
+- 🔐 **RBAC enforced** on every API endpoint via Spring Security + custom `RbacGuard`
+- 📅 **Session Management** — Create, list, and manage training sessions per batch
+- ✅ **Attendance Tracking** — Mark Present / Late / Absent per session
+- 🔗 **Batch Invite System** — Trainers generate invite tokens; students join via token
+- 📊 **Analytics Dashboards** — Per-batch, per-institution, and programme-wide summaries
+- 👁️ **Read-Only Monitoring** — Monitoring officers see all data without mutation access
+- 🐳 **Docker Deployment** — Backend Docker image deployed on Render
+- 🛡️ **Secure by Default** — No secrets in source, all credentials via environment variables
 
-| Role | Email | Password |
+---
+
+## 🏗️ Architecture
+
+```
+┌──────────────────────────┐    HTTP + X-Dev-Role    ┌───────────────────────────┐
+│     Next.js 14 Frontend  │  ◄────────────────────► │   Spring Boot 3.2 Backend │
+│        (Render)          │                          │        (Render / Docker)  │
+│                          │                          │                           │
+│  • 5 Role Dashboards     │                          │  • Spring Security RBAC   │
+│  • Axios API Client      │                          │  • Spring Data JPA        │
+│  • Dev-Mode Auth         │                          │  • GlobalExceptionHandler │
+│  • No hard-coded URLs    │                          │  • HikariCP Connection    │
+└──────────────────────────┘                          └───────────────────────────┘
+                                                                  │
+                                                         JDBC/SSL │
+                                                                  ▼
+                                                    ┌─────────────────────────┐
+                                                    │    Railway MySQL         │
+                                                    │  (Cloud-hosted, free)   │
+                                                    └─────────────────────────┘
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Purpose |
 |---|---|---|
-| Student | student@test.com | Test@1234 |
-| Trainer | trainer@test.com | Test@1234 |
-| Institution | institution@test.com | Test@1234 |
-| Programme Manager | pm@test.com | Test@1234 |
-| Monitoring Officer | mo@test.com | Test@1234 |
-
-> **Note:** Accounts must be created via the sign-up flow. After signing up, the onboarding page lets you pick your role.
-
----
-
-## 🏗 Architecture Decisions
-
-```
-┌─────────────────────┐       HTTPS + JWT        ┌──────────────────────┐
-│   Next.js Frontend  │  ◄──────────────────────► │  Spring Boot Backend │
-│    (Vercel)         │                            │    (Render)          │
-│                     │                            │                      │
-│  • Clerk Auth       │                            │  • Spring Security   │
-│  • 5 Role Dashboards│                            │  • OAuth2 RS (JWT)   │
-│  • Axios API client │                            │  • Spring Data JPA   │
-└─────────────────────┘                            └──────────────────────┘
-          │                                                  │
-          │ Clerk JWT                               JDBC/SSL │
-          ▼                                                  ▼
-  ┌──────────────┐                              ┌────────────────────┐
-  │  Clerk Auth  │                              │  Neon PostgreSQL   │
-  │  (JWKS URL)  │                              │  (Serverless DB)   │
-  └──────────────┘                              └────────────────────┘
-```
-
-**Key Decisions:**
-
-1. **Clerk JWT via OAuth2 Resource Server** — Spring Security validates Clerk JWTs using Clerk's JWKS endpoint. No custom JWT parsing needed, benefits from Spring's battle-tested JWT validation.
-
-2. **UserContextFilter** — After JWT validation, this filter looks up the local DB user record and attaches it to the request. RBAC is enforced against the DB role (not a JWT claim), making role changes possible without re-issuing tokens.
-
-3. **Idempotent /users/sync** — Called from the frontend after every Clerk signup/login. Safe to call multiple times; upserts the user record. This decouples Clerk's user management from our database.
-
-4. **Role-scoped queries** — Each dashboard endpoint auto-filters based on the caller's role (e.g., trainers only see their batches; students only see their enrolled sessions).
-
-5. **Neon PostgreSQL** — Serverless Postgres with connection pooling built in. DDL-validate mode means the schema SQL must be run once manually.
+| **Frontend** | Next.js 14 + TypeScript | App Router, SSR, dynamic pages |
+| **Backend** | Spring Boot 3.2 (Java 17) | REST API, RBAC, business logic |
+| **ORM** | Spring Data JPA + Hibernate | Type-safe DB operations |
+| **Database** | Railway MySQL | Managed cloud MySQL |
+| **Connection Pool** | HikariCP | Connection management & health |
+| **Containerization** | Docker (multi-stage build) | Backend deployment |
+| **Deployment** | Render (frontend + backend) | Free-tier cloud hosting |
+| **Build Tool** | Maven 3.9 | Java dependency management |
 
 ---
 
-## 🛠 Tech Stack
+## 👥 Role-Based Access
 
-| Layer | Tech | Why |
-|---|---|---|
-| Frontend | Next.js 14 + TypeScript | SSR, App Router, Vercel-native |
-| Auth | Clerk | Built-in UI, JWT, webhooks |
-| Backend | Spring Boot 3.2 (Java 17) | Production-grade RBAC, Spring Security |
-| ORM | Spring Data JPA + Hibernate | Type-safe, validated queries |
-| DB | PostgreSQL (Neon) | Serverless, free tier, scalable |
-| Deployment | Vercel + Render + Neon | All free-tier compatible |
-
----
-
-## ✅ What Works
-
-- Full authentication with Clerk (sign-up, login, JWT)
-- Role selection during onboarding → stored in PostgreSQL
-- 5 role-specific dashboards with full CRUD relevant to each role
-- RBAC enforced on every API endpoint (Spring Security + custom RbacGuard)
-- Student: view sessions, mark attendance (present/late/absent), join batch via invite
-- Trainer: create sessions, generate invite links, view per-session attendance
-- Institution: view and create batches, see batch-level attendance summaries
-- Programme Manager: cross-institution summary with per-institution drill-down
-- Monitoring Officer: read-only view of all sessions and attendance data
-- REST API: all 9+ endpoints from the spec
-- PostgreSQL schema with all tables, constraints, indexes
-- CORS configured for frontend origin
-
----
-
-## ⚠ What Is Incomplete / Known Limitations
-
-- **Clerk Webhook** — User sync uses a client-side call to `/api/users/sync` instead of a server-side Clerk webhook. This means the sync depends on the frontend calling the endpoint after signup. A production system would use a Clerk webhook with signature verification.
-- **Pagination** — List endpoints return all records. Should add `Pageable` support for large datasets.
-- **Clerk JWT `clockSkew`** — Deployed Render instances may face token expiry issues under high latency. Adding `clockSkew` tolerance in Spring Security helps.
-- **Real-time** — Attendance updates are not real-time (no WebSocket/SSE). Page refresh is required.
-
----
-
-## 🚀 Setup Instructions
-
-### Backend (Spring Boot)
-
-```bash
-# Prerequisites: Java 17, Maven 3.8+
-
-cd backend
-
-# Copy env template
-cp .env.example .env
-# → Fill in DATABASE_URL, CLERK_ISSUER_URI, FRONTEND_URL
-
-# Run schema in Neon SQL editor (one time):
-# Contents of src/main/resources/schema.sql
-
-# Run locally
-mvn spring-boot:run
-# → API available at http://localhost:8080
-```
-
-### Frontend (Next.js)
-
-```bash
-cd frontend
-
-# Copy env template
-cp .env.local.example .env.local
-# → Fill in Clerk keys and NEXT_PUBLIC_API_URL
-
-npm install
-npm run dev
-# → App available at http://localhost:3000
-```
-
----
-
-## 📦 Deployment Steps
-
-### 1. Neon PostgreSQL
-1. Go to [neon.tech](https://neon.tech), create a free project
-2. Open the SQL editor, paste & run the contents of `backend/src/main/resources/schema.sql`
-3. Copy the connection string
-
-### 2. Backend on Render
-1. Push this repo to GitHub
-2. Create a new **Web Service** on [render.com](https://render.com)
-3. Select the `backend/` folder (or use Docker build)
-4. Set environment variables:
-   - `DATABASE_URL` = Neon JDBC URL (`jdbc:postgresql://...`)
-   - `CLERK_ISSUER_URI` = Your Clerk Frontend API URL
-   - `FRONTEND_URL` = Your Vercel URL
-5. Build command: `mvn clean package -DskipTests`
-6. Start command: `java -jar target/*.jar`
-
-### 3. Frontend on Vercel
-1. Import GitHub repo on [vercel.com](https://vercel.com)
-2. Set **Root Directory** to `frontend`
-3. Set environment variables:
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-   - `CLERK_SECRET_KEY`
-   - `NEXT_PUBLIC_API_URL` = Render backend URL
-
----
-
-## 💡 One Improvement with More Time
-
-**Clerk Webhook with Role Metadata** — I would implement a proper Clerk webhook endpoint on the backend. When a user signs up, Clerk sends a `user.created` event with a signature. The backend would verify the signature, create the user record, and store the role in Clerk's `publicMetadata`. Subsequent JWTs would contain the role in claims, eliminating the extra DB lookup in `UserContextFilter` and making RBAC truly stateless.
+| Role | Access |
+|---|---|
+| 🎓 **Student** | View enrolled sessions, mark own attendance, join batches via invite |
+| 👨‍🏫 **Trainer** | Create sessions, view attendance per session, generate batch invite links |
+| 🏫 **Institution** | Create batches, view batch-level attendance summaries |
+| 📊 **Programme Manager** | Cross-institution analytics and per-batch drill-down |
+| 👁️ **Monitoring Officer** | Read-only view of all sessions and attendance records |
 
 ---
 
@@ -177,21 +98,222 @@ npm run dev
 
 ```
 skillbridge/
-├── frontend/          # Next.js 14 App Router
-│   ├── app/           # Pages (landing, sign-in, dashboards)
-│   ├── components/    # Sidebar, SessionCard, AttendanceTable, StatCard
-│   ├── lib/api.ts     # Typed API client
-│   └── middleware.ts  # Clerk route protection
+├── 📂 frontend/                    # Next.js 14 App Router
+│   ├── app/
+│   │   ├── page.tsx                # Landing page (role selector)
+│   │   ├── layout.tsx              # Root layout
+│   │   ├── onboarding/             # User onboarding & role selection
+│   │   └── dashboard/
+│   │       ├── student/            # Student dashboard
+│   │       ├── trainer/            # Trainer dashboard
+│   │       ├── institution/        # Institution dashboard
+│   │       ├── programme-manager/  # Programme Manager dashboard
+│   │       └── monitoring-officer/ # Monitoring Officer dashboard
+│   ├── components/
+│   │   ├── Sidebar.tsx             # Shared navigation sidebar
+│   │   ├── SessionCard.tsx         # Session display component
+│   │   ├── AttendanceTable.tsx     # Attendance records table
+│   │   └── StatCard.tsx            # Stat metric card
+│   ├── lib/
+│   │   └── api.ts                  # Typed Axios API client
+│   ├── middleware.ts                # Route protection middleware
+│   ├── .env.example                # Environment variable template
+│   └── Dockerfile                  # (optional) frontend container
 │
-├── backend/           # Spring Boot 3.2
-│   └── src/main/java/com/skillbridge/
-│       ├── controller/   # BatchController, SessionController, etc.
-│       ├── service/      # Business logic
-│       ├── repository/   # JPA repositories
-│       ├── entity/       # JPA entities
-│       ├── dto/          # Request/Response DTOs
-│       ├── security/     # UserContextFilter, RbacGuard
-│       └── config/       # SecurityConfig (CORS, JWT)
+├── 📂 backend/                     # Spring Boot 3.2
+│   ├── src/main/java/com/skillbridge/
+│   │   ├── controller/             # REST controllers (Batch, Session, Attendance…)
+│   │   ├── service/                # Business logic layer
+│   │   ├── repository/             # Spring Data JPA repositories
+│   │   ├── entity/                 # JPA entities (User, Batch, Session, Attendance…)
+│   │   ├── dto/                    # Request & Response DTOs
+│   │   ├── security/               # DevAuthFilter, UserContextFilter, RbacGuard
+│   │   ├── exception/              # GlobalExceptionHandler
+│   │   └── config/                 # SecurityConfig, CorsConfig
+│   ├── src/main/resources/
+│   │   ├── application.yml         # Profile-based configuration
+│   │   └── schema.sql              # MySQL DDL schema
+│   ├── Dockerfile                  # Multi-stage Docker build
+│   └── .env.example                # Backend env variable template
 │
+├── render.yaml                     # Render Blueprint (auto-deploys both services)
+├── .gitignore                      # Excludes node_modules, target, .env files
 └── README.md
 ```
+
+---
+
+## 🚀 Local Development Setup
+
+### Prerequisites
+- Java 17+, Maven 3.8+
+- Node.js 18+, npm
+- MySQL (local) or Railway MySQL URL
+
+### Backend
+
+```bash
+cd backend
+
+# 1. Create .env from template
+cp .env.example .env
+# Fill in: DB_PASSWORD, DATABASE_URL, FRONTEND_URL
+
+# 2. Run with dev profile (bypasses JWT auth — uses X-Dev-Role header)
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+# ✅ API running at http://localhost:8080
+# ✅ Test: curl http://localhost:8080/api/health
+```
+
+### Frontend
+
+```bash
+cd frontend
+
+# 1. Install dependencies
+npm install
+
+# 2. Create .env.local from template
+cp .env.example .env.local
+# Set: NEXT_PUBLIC_API_URL=http://localhost:8080
+#      NEXT_PUBLIC_DEV_ROLE=STUDENT
+
+# 3. Start dev server
+npm run dev
+
+# ✅ App running at http://localhost:3000
+```
+
+---
+
+## ☁️ Deployment
+
+### Option A — Render Blueprint (Recommended, 1-click)
+
+1. Fork/clone this repo to GitHub
+2. Go to [dashboard.render.com](https://dashboard.render.com) → **New+** → **Blueprint**
+3. Connect the GitHub repo — Render auto-detects `render.yaml`
+4. Add the sensitive env vars manually:
+
+| Service | Variable | Value |
+|---|---|---|
+| Backend | `DATABASE_URL` | Railway MySQL JDBC URL |
+| Backend | `DB_USERNAME` | `root` |
+| Backend | `DB_PASSWORD` | Your Railway MySQL password |
+| Frontend | `NEXT_PUBLIC_API_URL` | `https://skillbridge-backend.onrender.com` |
+
+5. Click **Apply** — both services deploy automatically ✅
+
+---
+
+### Option B — Manual Deployment
+
+**Backend (Render Web Service)**
+
+| Setting | Value |
+|---|---|
+| Root Directory | `backend` |
+| Runtime | `Docker` |
+| Instance | Free |
+
+Environment Variables:
+```env
+SPRING_PROFILES_ACTIVE = dev
+PORT                   = 8080
+DATABASE_URL           = jdbc:mysql://<host>:<port>/railway?useSSL=true&...
+DB_USERNAME            = root
+DB_PASSWORD            = <your-password>
+FRONTEND_URL           = https://skillbridge-frontend.onrender.com
+```
+
+**Frontend (Render Web Service)**
+
+| Setting | Value |
+|---|---|
+| Root Directory | `frontend` |
+| Runtime | `Node` |
+| Build Command | `npm install && npm run build` |
+| Start Command | `npm start` |
+
+Environment Variables:
+```env
+NEXT_PUBLIC_API_URL  = https://skillbridge-backend.onrender.com
+NEXT_PUBLIC_DEV_ROLE = STUDENT
+NODE_VERSION         = 18
+```
+
+---
+
+## 🔑 Environment Variables Reference
+
+### Backend (`backend/.env.example`)
+
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | ✅ | Full JDBC MySQL connection URL |
+| `DB_USERNAME` | ✅ | Database username |
+| `DB_PASSWORD` | ✅ | Database password |
+| `PORT` | ✅ | Server port (set 8080 on Render) |
+| `SPRING_PROFILES_ACTIVE` | ✅ | `dev` for dev mode, `prod` for Clerk auth |
+| `FRONTEND_URL` | ✅ | Frontend URL (for CORS) |
+| `CLERK_ISSUER_URI` | ⚡ prod only | Clerk JWKS issuer URI |
+
+### Frontend (`frontend/.env.example`)
+
+| Variable | Required | Description |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | ✅ | Backend URL (no trailing slash) |
+| `NEXT_PUBLIC_DEV_ROLE` | dev only | Role for dev bypass (`STUDENT`, `TRAINER`, etc.) |
+
+---
+
+## 🧪 API Reference
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/health` | Public | DB connection health check |
+| `POST` | `/api/users/sync` | Public | Create/update user record |
+| `GET` | `/api/users/me` | Any role | Get current user info |
+| `GET` | `/api/batches` | Any role | List batches (role-filtered) |
+| `POST` | `/api/batches` | Institution | Create a batch |
+| `POST` | `/api/batches/:id/invite` | Trainer | Generate invite token |
+| `POST` | `/api/batches/:id/join` | Student | Join batch via token |
+| `GET` | `/api/batches/:id/summary` | Institution+ | Batch attendance summary |
+| `GET` | `/api/sessions` | Any role | List sessions (role-filtered) |
+| `POST` | `/api/sessions` | Trainer | Create a session |
+| `GET` | `/api/attendance/me` | Student | My attendance records |
+| `POST` | `/api/attendance/mark` | Student | Mark attendance |
+| `GET` | `/api/attendance/session/:id` | Trainer+ | Session attendance list |
+| `GET` | `/api/programme/summary` | PM / MO | Programme-wide summary |
+
+---
+
+## 🔒 Security Notes
+
+- All secrets stored in environment variables — ❌ never in source code
+- `.env`, `.env.local`, `target/`, `node_modules/` are gitignored
+- Dev mode uses `X-Dev-Role` header (only active when `SPRING_PROFILES_ACTIVE=dev`)
+- Production profile requires valid Clerk JWT for all protected endpoints
+- CORS configured to only allow requests from the configured `FRONTEND_URL`
+
+---
+
+## 📌 Known Limitations
+
+| Area | Limitation |
+|---|---|
+| **Auth** | Dev mode uses header-based role bypass — switch to `SPRING_PROFILES_ACTIVE=prod` with real Clerk keys for production security |
+| **Pagination** | List endpoints return all records — add `Pageable` for large datasets |
+| **Real-time** | Attendance updates require page refresh (no WebSocket/SSE) |
+| **Webhooks** | User sync is client-side; production should use Clerk webhook with signature verification |
+
+---
+
+<div align="center">
+
+Built with ❤️ by **Zubair Ahmad Beigh**
+
+[![GitHub](https://img.shields.io/badge/GitHub-zubair--ahmad--beigh-181717?style=flat-square&logo=github)](https://github.com/zubair-ahmad-beigh)
+
+</div>
