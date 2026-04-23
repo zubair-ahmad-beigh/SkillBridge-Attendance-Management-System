@@ -5,7 +5,7 @@ spring:
   datasource:
     url: "${DATABASE_URL:jdbc:mysql://interchange.proxy.rlwy.net:23108/railway?useSSL=true&requireSSL=true&verifyServerCertificate=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&connectTimeout=30000&socketTimeout=60000}"
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:changeme}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 30000
@@ -19,49 +19,49 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
-    properties:
-      hibernate:
-        format_sql: false
-        jdbc:
-          time_zone: UTC
+    open-in-view: false
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${CLERK_ISSUER_URI:https://placeholder.clerk.accounts.dev}
+  # ── CRITICAL: Disable OAuth2 resource server auto-config in base profile ──
+  # issuer-uri is ONLY set in non-dev (prod) profile below to avoid
+  # Spring fetching OIDC metadata at startup (which crashes the app when
+  # using a placeholder URL or no real Clerk key yet)
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
 
 app:
   cors:
     allowed-origins: "${FRONTEND_URL:http://localhost:3000}"
-  dev-mode: false
+  dev-mode: true
 
 logging:
   level:
     com.skillbridge: DEBUG
+    com.zaxxer.hikari: INFO
     org.springframework.security: WARN
-    com.zaxxer.hikari: DEBUG
-    org.hibernate.SQL: DEBUG
 
 ---
+# ─── PROD PROFILE (with real Clerk keys) ─────────────────────────────────
+# Activate by setting: SPRING_PROFILES_ACTIVE=prod
 spring:
   config:
     activate:
-      on-profile: dev
+      on-profile: prod
+  autoconfigure:
+    exclude: []   # Re-enable OAuth2 auto-config in prod
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://placeholder.clerk.accounts.dev
+          issuer-uri: ${CLERK_ISSUER_URI}
 
 app:
-  dev-mode: true
+  dev-mode: false
   cors:
-    allowed-origins: "http://localhost:3000"
+    allowed-origins: "${FRONTEND_URL}"
 
 logging:
   level:
-    com.skillbridge: DEBUG
-    com.zaxxer.hikari: DEBUG
+    com.skillbridge: INFO

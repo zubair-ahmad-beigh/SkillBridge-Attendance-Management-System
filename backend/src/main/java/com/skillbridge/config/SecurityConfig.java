@@ -2,7 +2,6 @@ package com.skillbridge.config;
 
 import com.skillbridge.security.UserContextFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,9 +28,9 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigin;
 
-    // ─── DEV profile: permit everything, no JWT ───────────────────────────────
+    // ─── DEV / default: permit all, no JWT required ───────────────────────
     @Bean
-    @Profile("dev")
+    @Profile("!prod")
     public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -41,9 +40,9 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ─── PROD profile: JWT via Clerk JWKS ─────────────────────────────────────
+    // ─── PROD: JWT via Clerk JWKS ─────────────────────────────────────────
     @Bean
-    @Profile("!dev")
+    @Profile("prod")
     public SecurityFilterChain prodSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -51,7 +50,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/users/sync").permitAll()
-                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/api/health").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}))
@@ -62,7 +61,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(allowedOrigin, "http://localhost:3000"));
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

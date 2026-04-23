@@ -24,7 +24,7 @@ import java.util.Optional;
  * Only active in production (not in dev profile).
  */
 @Component
-@Profile("!dev")
+@Profile("prod")
 @RequiredArgsConstructor
 @Slf4j
 public class UserContextFilter extends OncePerRequestFilter {

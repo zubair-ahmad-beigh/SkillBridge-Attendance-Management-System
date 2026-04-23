@@ -30,7 +30,7 @@ import java.util.UUID;
  *   X-Dev-User-Name: John Doe (optional)
  */
 @Component
-@Profile("dev")
+@Profile("!prod")
 @RequiredArgsConstructor
 @Slf4j
 public class DevAuthFilter extends OncePerRequestFilter {
