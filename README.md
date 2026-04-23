@@ -308,12 +308,4 @@ NODE_VERSION         = 18
 | **Real-time** | Attendance updates require page refresh (no WebSocket/SSE) |
 | **Webhooks** | User sync is client-side; production should use Clerk webhook with signature verification |
 
----
 
-<div align="center">
-
-Built with ❤️ by **Zubair Ahmad Beigh**
-
-[![GitHub](https://img.shields.io/badge/GitHub-zubair--ahmad--beigh-181717?style=flat-square&logo=github)](https://github.com/zubair-ahmad-beigh)
-
-</div>
