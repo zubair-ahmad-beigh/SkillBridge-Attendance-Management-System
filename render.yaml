@@ -1,0 +1,35 @@
+services:
+  # ── Backend: Spring Boot (Docker) ─────────────────────────────────────────
+  - type: web
+    name: skillbridge-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: PORT
+        value: 8080
+      - key: DATABASE_URL
+        sync: false   # Set manually in Render dashboard (contains credentials)
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: FRONTEND_URL
+        value: https://skillbridge-frontend.onrender.com
+
+  # ── Frontend: Next.js (Node.js) ───────────────────────────────────────────
+  - type: web
+    name: skillbridge-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: NEXT_PUBLIC_API_URL
+        value: https://skillbridge-backend.onrender.com
+      - key: NEXT_PUBLIC_DEV_ROLE
+        value: STUDENT
