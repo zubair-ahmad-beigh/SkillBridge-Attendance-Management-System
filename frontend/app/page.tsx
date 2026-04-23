@@ -48,7 +48,7 @@ export default function HomePage() {
       </div>
 
       <p style={{ marginTop: 40, color: '#374151', fontSize: 12 }}>
-        🔧 Local Dev Mode — Backend at localhost:8080
+        SkillBridge Attendance Management System
       </p>
     </main>
   );

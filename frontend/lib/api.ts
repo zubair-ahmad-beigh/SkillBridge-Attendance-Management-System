@@ -1,24 +1,19 @@
 import axios from 'axios';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const DEV_ROLE = process.env.NEXT_PUBLIC_DEV_ROLE;
 
-// Create axios instance
+// ─── Axios instance ──────────────────────────────────────────────────────────
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Inject Clerk JWT on every request
-api.interceptors.request.use(async (config) => {
-  try {
-    // Dynamic import to avoid SSR issues
-    const { getToken } = await import('@clerk/nextjs/server').catch(() => ({ getToken: null }));
-    // On client side, use window.__clerk_session
-    if (typeof window !== 'undefined' && (window as any).__clerk_session) {
-      const token = await (window as any).__clerk_session.getToken();
-      if (token) config.headers['Authorization'] = `Bearer ${token}`;
-    }
-  } catch {}
+// In dev mode: inject X-Dev-Role so backend can resolve user without Clerk JWT
+api.interceptors.request.use((config) => {
+  if (DEV_ROLE) {
+    config.headers['X-Dev-Role'] = DEV_ROLE;
+  }
   return config;
 });
 
@@ -62,8 +57,6 @@ export const markAttendance = (data: { sessionId: string; status: string }) =>
 export const getMyAttendance = () => api.get('/attendance/me').then(r => r.data);
 
 // ─── Summaries ───────────────────────────────────────────────────────────────
-export const getInstitutionSummary = (institutionId: string) =>
-  api.get(`/institutions/${institutionId}/summary`).then(r => r.data);
 export const getProgrammeSummary = () =>
   api.get('/programme/summary').then(r => r.data);
 
