@@ -3,15 +3,29 @@ server:
 
 spring:
   datasource:
-    url: ${DATABASE_URL:jdbc:mysql://interchange.proxy.rlwy.net:23108/railway?useSSL=true&requireSSL=true&verifyServerCertificate=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    url: "${DATABASE_URL:jdbc:mysql://interchange.proxy.rlwy.net:23108/railway?useSSL=true&requireSSL=true&verifyServerCertificate=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&connectTimeout=30000&socketTimeout=60000}"
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 5
+      minimum-idle: 1
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-test-query: SELECT 1
+      keepalive-time: 60000
+
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          time_zone: UTC
 
   security:
     oauth2:
@@ -21,13 +35,15 @@ spring:
 
 app:
   cors:
-    allowed-origins: ${FRONTEND_URL:http://localhost:3000}
+    allowed-origins: "${FRONTEND_URL:http://localhost:3000}"
   dev-mode: false
 
 logging:
   level:
-    com.skillbridge: INFO
+    com.skillbridge: DEBUG
     org.springframework.security: WARN
+    com.zaxxer.hikari: DEBUG
+    org.hibernate.SQL: DEBUG
 
 ---
 spring:
@@ -43,8 +59,9 @@ spring:
 app:
   dev-mode: true
   cors:
-    allowed-origins: http://localhost:3000
+    allowed-origins: "http://localhost:3000"
 
 logging:
   level:
     com.skillbridge: DEBUG
+    com.zaxxer.hikari: DEBUG

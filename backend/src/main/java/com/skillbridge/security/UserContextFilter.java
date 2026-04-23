@@ -1,6 +1,5 @@
 package com.skillbridge.security;
 
-import com.skillbridge.entity.Role;
 import com.skillbridge.entity.User;
 import com.skillbridge.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -9,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -21,8 +21,10 @@ import java.util.Optional;
 /**
  * Resolves the authenticated Clerk user's DB record and stores it
  * as a request attribute ("currentUser") for use in controllers/services.
+ * Only active in production (not in dev profile).
  */
 @Component
+@Profile("!dev")
 @RequiredArgsConstructor
 @Slf4j
 public class UserContextFilter extends OncePerRequestFilter {
