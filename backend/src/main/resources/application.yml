@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/skillbridge?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true}
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/skillbridge?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,9 +12,6 @@ spring:
       ddl-auto: update
     show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
-    properties:
-      hibernate:
-        format_sql: false
 
   security:
     oauth2:
@@ -33,8 +30,6 @@ logging:
     org.springframework.security: WARN
 
 ---
-# ─── DEV PROFILE ─────────────────────────────────────────────────────────────
-# Run with: mvn spring-boot:run -Dspring-boot.run.profiles=dev
 spring:
   config:
     activate:
