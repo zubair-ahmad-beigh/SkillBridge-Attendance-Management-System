@@ -1,0 +1,55 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/skillbridge?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        format_sql: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${CLERK_ISSUER_URI:https://placeholder.clerk.accounts.dev}
+
+app:
+  cors:
+    allowed-origins: ${FRONTEND_URL:http://localhost:3000}
+  dev-mode: false
+
+logging:
+  level:
+    com.skillbridge: INFO
+    org.springframework.security: WARN
+
+---
+# ─── DEV PROFILE ─────────────────────────────────────────────────────────────
+# Run with: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+spring:
+  config:
+    activate:
+      on-profile: dev
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://placeholder.clerk.accounts.dev
+
+app:
+  dev-mode: true
+  cors:
+    allowed-origins: http://localhost:3000
+
+logging:
+  level:
+    com.skillbridge: DEBUG
