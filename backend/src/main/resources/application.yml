@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/skillbridge?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true}
+    url: ${DATABASE_URL:jdbc:mysql://interchange.proxy.rlwy.net:23108/railway?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
