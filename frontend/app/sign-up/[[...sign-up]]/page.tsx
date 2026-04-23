@@ -1,15 +1,6 @@
-import { SignUp } from '@clerk/nextjs';
+// sign-up page — redirects to home in dev mode (no Clerk key configured)
+import { redirect } from 'next/navigation';
 
 export default function SignUpPage() {
-  return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'var(--bg-primary)'
-    }}>
-      <SignUp />
-    </div>
-  );
+  redirect('/');
 }
