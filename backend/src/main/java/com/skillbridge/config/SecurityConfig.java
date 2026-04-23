@@ -1,7 +1,6 @@
 package com.skillbridge.config;
 
 import com.skillbridge.security.UserContextFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,15 +19,14 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+// ⚠️ No @RequiredArgsConstructor — UserContextFilter is injected per @Bean method
+//    to avoid "No qualifying bean" error when @Profile("prod") filter doesn't exist in dev
 public class SecurityConfig {
 
-    private final UserContextFilter userContextFilter;
-
-    @Value("${app.cors.allowed-origins}")
+    @Value("${app.cors.allowed-origins:http://localhost:3000}")
     private String allowedOrigin;
 
-    // ─── DEV / default: permit all, no JWT required ───────────────────────
+    // ─── DEV / default: permit all, no JWT, no UserContextFilter needed ───
     @Bean
     @Profile("!prod")
     public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -41,9 +39,11 @@ public class SecurityConfig {
     }
 
     // ─── PROD: JWT via Clerk JWKS ─────────────────────────────────────────
+    // UserContextFilter is injected HERE (method param) — only resolved in prod
     @Bean
     @Profile("prod")
-    public SecurityFilterChain prodSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain prodSecurityFilterChain(HttpSecurity http,
+                                                        UserContextFilter userContextFilter) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
